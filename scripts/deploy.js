@@ -7,7 +7,7 @@ async function main() {
   const heirAddress = process.env.HEIRADDRESS;
   const inheritance = await Inheritance.deploy(heirAddress);
 
-  console.log("Contract deployed to:", await inheritance.getAddress());
+  console.log(await inheritance.getAddress());
 }
 
 main().catch((error) => {

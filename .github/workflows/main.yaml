@@ -73,16 +73,9 @@ jobs:
 
     - name: Deploy to Sepolia
       run: |
-        DEPLOY_OUTPUT=$(npx hardhat run scripts/deploy.js --network sepolia)
-        echo "$DEPLOY_OUTPUT"
-       
-        CONTRACT_ADDRESS=$(echo "$DEPLOY_OUTPUT" | awk '{print $3}')
-        if [ -z "$CONTRACT_ADDRESS" ]; then
-          echo "Error: Could not extract contract address"
-          exit 1
-        fi
+        CONTRACT_ADDRESS=$(npx hardhat run scripts/deploy.js --network sepolia)
+        echo "Contract address: $CONTRACT_ADDRESS"
         echo "contract-address=$CONTRACT_ADDRESS" >> $GITHUB_OUTPUT
-        
       env:
         SEPOLIA_RPC_URL: ${{ env.SEPOLIA_RPC_URL }}
         PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
