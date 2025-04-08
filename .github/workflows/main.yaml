@@ -88,3 +88,5 @@ jobs:
         ${{ env.HEIRADDRESS }}
       env:
         ETHERSCAN_API_KEY: ${{ env.ETHERSCAN_API_KEY }}
+        HEIRADDRESS: ${{ env.HEIRADDRESS }}
+        PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
