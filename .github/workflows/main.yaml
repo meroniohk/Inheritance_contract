@@ -80,13 +80,3 @@ jobs:
         SEPOLIA_RPC_URL: ${{ env.SEPOLIA_RPC_URL }}
         PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
         HEIRADDRESS: ${{ env.HEIRADDRESS }}
-
-    - name: Verify on Etherscan
-      run: |
-        npx hardhat verify --network sepolia \
-        ${{ steps.deploy.outputs.contract-address }} \
-        ${{ env.HEIRADDRESS }}
-      env:
-        ETHERSCAN_API_KEY: ${{ env.ETHERSCAN_API_KEY }}
-        HEIRADDRESS: ${{ env.HEIRADDRESS }}
-        PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
