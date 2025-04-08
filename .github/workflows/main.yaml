@@ -9,9 +9,9 @@ name: Test and Deploy Contracts
 env:
   NODE_VERSION: 18.x
   SOLC_VERSION: 0.8.28
-  FORK_URL: https://sepolia.infura.io/v3/${{ secrets.INFURA_APIKEY }}
+  SEPOLIA_RPC_URL: https://sepolia.infura.io/v3/${{ secrets.INFURA_APIKEY }}
   ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-  PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
   HEIRADDRESS: ${{ secrets.HEIRADDRESS }}
 
 jobs:
@@ -84,8 +84,8 @@ jobs:
         echo "contract-address=$CONTRACT_ADDRESS" >> $GITHUB_OUTPUT
         
       env:
-        SEPOLIA_RPC_URL: ${{ env.FORK_URL }}
-        DEPLOYER_PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
+        SEPOLIA_RPC_URL: ${{ env.SEPOLIA_RPC_URL }}
+        PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
         HEIRADDRESS: ${{ env.HEIRADDRESS }}
 
     - name: Verify on Etherscan
