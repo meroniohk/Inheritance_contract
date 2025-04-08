@@ -1,0 +1,97 @@
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+name: Test and Deploy Contracts
+
+env:
+  NODE_VERSION: 18.x
+  SOLC_VERSION: 0.8.28
+  FORK_URL: https://sepolia.infura.io/v3/${{ secrets.INFURA_APIKEY }}
+  ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+  PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+  HEIRADDRESS: ${{ secrets.HEIRADDRESS }}
+
+jobs:
+  test:
+    name: Setup and Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        npm install
+        npm install --save-dev @nomicfoundation/hardhat-network-helpers
+        npm install --save-dev @nomicfoundation/hardhat-verify
+        npm install --save-dev solidity-coverage
+        npm install @openzeppelin/contracts  
+        npm install @chainlink/contracts 
+
+    - name: compile contract
+      run: npx hardhat compile
+
+    - name: Run unit tests
+      run: npx hardhat test
+
+    - name: Run coverage report
+      run: npx hardhat coverage
+
+  deploy-sepolia:
+    name: Deploy to Sepolia
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+           npm install @openzeppelin/contracts
+           npm install @chainlink/contract
+
+    - name: Compile contracts
+      run: npx hardhat compile
+
+    - name: Deploy to Sepolia
+      run: |
+        DEPLOY_OUTPUT=$(npx hardhat run scripts/deploy.js --network sepolia)
+        echo "$DEPLOY_OUTPUT"
+       
+        CONTRACT_ADDRESS=$(echo "$DEPLOY_OUTPUT" | awk '{print $3}')
+        if [ -z "$CONTRACT_ADDRESS" ]; then
+          echo "Error: Could not extract contract address"
+          exit 1
+        fi
+        echo "contract-address=$CONTRACT_ADDRESS" >> $GITHUB_OUTPUT
+        
+      env:
+        SEPOLIA_RPC_URL: ${{ env.FORK_URL }}
+        DEPLOYER_PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
+        HEIRADDRESS: ${{ env.HEIRADDRESS }}
+
+    - name: Verify on Etherscan
+      run: |
+        npx hardhat verify --network sepolia \
+        ${{ steps.deploy.outputs.contract-address }} \
+        ${{ env.HEIRADDRESS }}
+      env:
+        ETHERSCAN_API_KEY: ${{ env.ETHERSCAN_API_KEY }}
